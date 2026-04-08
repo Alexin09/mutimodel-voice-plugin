@@ -1,0 +1,56 @@
+# mutimodel-voice-plugin 配置文件
+# 环境变量可覆盖此处设置（前缀 MVPLUGIN_）
+
+# ==================== 音频捕获 ====================
+audio:
+  sample_rate: 16000          # ASR 要求 16kHz
+  channels: 1                 # 单声道
+  chunk_duration_ms: 100      # 每个音频块的毫秒数
+  preferred_devices:           # 优先选择的麦克风名称关键词
+    - "DJI"                   # DJI Mic 无线麦克风
+    - "Wireless"
+
+# ==================== ASR 引擎 ====================
+asr:
+  engine: sensevoice           # sensevoice / doubao / whisper
+  model: iic/SenseVoiceSmall   # SenseVoice-Small 模型
+  device: auto                 # auto / cpu / cuda / mps
+  language: zh                 # zh / en / ja / ko / yue / auto
+
+# ==================== 后处理 Pipeline ====================
+processors:
+  # 按顺序执行的处理器列表
+  pipeline:
+    - filler_filter            # 口语填充词过滤
+    - dictionary_replace       # 自定义词典替换
+    - llm_polish               # LLM 智能润色（需配置 API Key）
+
+  # 词典设置
+  dictionary_dir: dictionaries
+  dictionary_files:
+    - default.yaml
+
+  # LLM 设置（兼容 OpenAI API 的任意服务）
+  llm_enabled: false           # 默认关闭，配置好 API Key 后改为 true
+  llm_api_key: ""              # 或通过环境变量 MVPLUGIN_LLM_API_KEY 设置
+  llm_base_url: "https://api.openai.com/v1"  # 国产模型改这里
+  llm_model: "gpt-4o-mini"
+
+  # 国产模型示例：
+  # 通义千问:
+  #   llm_base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  #   llm_model: "qwen-turbo"
+  # Kimi:
+  #   llm_base_url: "https://api.moonshot.cn/v1"
+  #   llm_model: "moonshot-v1-8k"
+  # 豆包:
+  #   llm_base_url: "https://ark.cn-beijing.volces.com/api/v3"
+  #   llm_model: "ep-xxxxxxxx"
+
+# ==================== 快捷键 ====================
+hotkey:
+  key: f2                      # 全局快捷键
+  mode: toggle                 # toggle(按一次开/再按停) / push_to_talk(按住说)
+
+# ==================== 其他 ====================
+log_level: INFO                # DEBUG / INFO / WARNING / ERROR

@@ -1,0 +1,83 @@
+[project]
+name = "mutimodel-voice-plugin"
+version = "0.1.0"
+description = "多模型语音识别 + 智能后处理 Pipeline（SenseVoice-Small / 豆包 / Whisper）"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.10"
+authors = [
+    {name = "ale.x"},
+]
+keywords = ["speech-recognition", "asr", "sensevoice", "funasr", "voice-input"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+]
+
+# 核心依赖
+dependencies = [
+    "pyyaml>=6.0",
+    "sounddevice>=0.4",
+    "numpy>=1.24",
+]
+
+[project.optional-dependencies]
+# SenseVoice 引擎（默认推荐）
+sensevoice = [
+    "funasr>=1.0",
+    "torch>=2.0",
+    "torchaudio>=2.0",
+    "modelscope>=1.10",
+]
+# Whisper 本地引擎
+whisper = [
+    "faster-whisper>=1.0",
+]
+# 豆包云端引擎
+doubao = [
+    "websockets>=12.0",
+]
+# LLM 后处理
+llm = [
+    "httpx>=0.25",
+]
+# 全局快捷键
+hotkey = [
+    "pynput>=1.7",
+]
+# 音频文件处理（测试用）
+audio = [
+    "soundfile>=0.12",
+    "samplerate>=0.2",
+]
+# 全部安装
+all = [
+    "mutimodel-voice-plugin[sensevoice,whisper,doubao,llm,hotkey,audio]",
+]
+# 开发依赖
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.21",
+    "ruff>=0.1",
+]
+
+[project.scripts]
+mvplugin = "mutimodel_voice_plugin.cli:main"
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

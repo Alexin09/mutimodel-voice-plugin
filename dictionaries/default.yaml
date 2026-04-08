@@ -1,0 +1,36 @@
+# 默认词典 — 常见 ASR 误识别修正
+# 格式说明：
+#   from: 源词（ASR 可能输出的错误写法），支持字符串或列表
+#   to:   目标词（正确写法）
+#   from 以 "re:" 开头表示正则表达式
+
+replacements:
+  # 常见缩写
+  - from: "欧克二"
+    to: "OKR"
+  - from: "皮皮迪"
+    to: "PPT"
+  - from: ["艾皮爱", "API接口"]
+    to: "API"
+
+  # 技术术语
+  - from: "吉特"
+    to: "Git"
+  - from: "吉特哈布"
+    to: "GitHub"
+  - from: ["赛恩斯沃伊斯", "森斯沃伊斯"]
+    to: "SenseVoice"
+  - from: "法纳斯二"
+    to: "FunASR"
+  - from: "派森"
+    to: "Python"
+  - from: "贾瓦斯克里普特"
+    to: "JavaScript"
+
+  # 硬件
+  - from: "大疆麦克"
+    to: "DJI Mic"
+
+  # 在此添加你自己的专业术语...
+  # - from: "你的误识别词"
+  #   to: "正确写法"
