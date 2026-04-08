@@ -4,14 +4,12 @@
 
 **Plug-and-play multi-model voice recognition pipeline with intelligent post-processing**
 
-可插拔多模型语音识别 + 智能后处理 Pipeline
-
 [![License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://python.org)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](#-quick-start)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-[English](#-what-is-this) · [中文](#-这是什么)
+**[中文文档](README_CN.md)**
 
 </div>
 
@@ -34,18 +32,6 @@ You get:    "我们下周三讨论一下 OKR 的 PPT。"
 3. **Post-Processing** — filler word removal → custom dictionary → LLM polish
 
 Everything runs **locally by default**. Your voice never leaves your machine.
-
-## 🤔 这是什么？
-
-你对着麦克风说话，出来的文字**干净、准确、可以直接用**。
-
-这是一个纯 Python 语音识别流水线，把三件事串起来：
-
-1. **音频捕获** — 自动识别你的麦克风（DJI Mic / USB / 蓝牙）
-2. **ASR 引擎** — 可切换：SenseVoice-Small（默认，本地）/ 豆包（云端）/ Whisper（本地）
-3. **后处理** — 口语过滤 → 词典替换 → LLM 润色
-
-默认**全部本地运行**，你的语音数据不出你的电脑。
 
 ---
 
@@ -147,28 +133,18 @@ pip install -e ".[sensevoice,hotkey]"
 pip install -e ".[all]"
 ```
 
-### 2. Download SenseVoice-Small Model (~450MB)
+### 2. Download Model (~450MB)
 
 ```bash
-# Auto-download from ModelScope
 mvplugin download-model
-
-# Or manually:
-python scripts/download_model.py
 ```
 
-> 📦 Model source: [ModelScope](https://modelscope.cn/models/iic/SenseVoiceSmall) · [HuggingFace](https://huggingface.co/FunAudioLLM/SenseVoiceSmall)
->
-> Downloaded to: `~/.cache/modelscope/hub/iic/SenseVoiceSmall/`
+> 📦 Source: [ModelScope](https://modelscope.cn/models/iic/SenseVoiceSmall) · [HuggingFace](https://huggingface.co/FunAudioLLM/SenseVoiceSmall)
 
 ### 3. Run
 
 ```bash
-# Start voice recognition (press F2 to toggle recording)
-mvplugin run
-
-# Or with options
-mvplugin run --engine sensevoice --device mps --hotkey f2
+mvplugin run          # Press F2 to toggle recording
 ```
 
 That's it. Plug in your mic, press F2, start talking.
@@ -198,34 +174,28 @@ mvplugin test recording.wav           # Test recognition on a file
 Edit `configs/config.yaml`:
 
 ```yaml
-# ASR Engine
 asr:
   engine: sensevoice          # sensevoice / doubao / whisper
   model: iic/SenseVoiceSmall
   device: auto                # auto / cpu / cuda / mps
 
-# Post-Processing Pipeline (executed in order)
 processors:
   pipeline:
     - filler_filter           # Remove "um", "那个", etc.
     - dictionary_replace      # Custom term replacement
     - llm_polish              # LLM refinement (optional)
 
-  # LLM settings (any OpenAI-compatible API)
   llm_enabled: false
   llm_api_key: ""             # Or: export MVPLUGIN_LLM_API_KEY=sk-xxx
   llm_base_url: "https://api.openai.com/v1"
   llm_model: "gpt-4o-mini"
 
-# Hotkey
 hotkey:
   key: f2
   mode: toggle                # toggle / push_to_talk
 ```
 
 ### Environment Variables
-
-All config values can be overridden:
 
 ```bash
 export MVPLUGIN_ASR_ENGINE=whisper
@@ -250,29 +220,19 @@ replacements:
     to: "PPT"
 ```
 
-Or via CLI:
-
-```bash
-mvplugin dict add "你的术语" "正确写法"
-```
-
 ---
 
 ## 🔌 Engine Comparison
 
-| Engine | Local | Streaming | Speed | Chinese | Multi-lang | Model Size |
-|--------|-------|-----------|-------|---------|------------|------------|
+| Engine | Local | Streaming | Speed | Chinese | Multi-lang | Size |
+|--------|-------|-----------|-------|---------|------------|------|
 | **SenseVoice-Small** ⭐ | ✅ | Segmented | ⚡⚡⚡ | ⭐⭐⭐⭐ | 50+ langs | ~450MB |
 | **Doubao 2.0** | ❌ Cloud | ✅ Real-time | ⚡⚡⚡ | ⭐⭐⭐⭐⭐ | CN+EN | — |
 | **Whisper** | ✅ | Segmented | ⚡ | ⭐⭐⭐ | 99 langs | 75MB–3GB |
 
-> **Why SenseVoice-Small as default?**
-> Single model = ASR + VAD + punctuation. No need for 3 separate models.
-> ~450MB footprint. Non-autoregressive = 50x faster than Whisper.
-
 ---
 
-## 🧩 Use as a Python Library
+## 🧩 Use as Python Library
 
 ```python
 import asyncio
@@ -282,23 +242,18 @@ from mutimodel_voice_plugin.processors.filler_filter import FillerFilterProcesso
 from mutimodel_voice_plugin.processors.dictionary_replace import DictionaryReplaceProcessor
 
 async def main():
-    # 1. Initialize ASR engine
     engine = SenseVoiceEngine(model="iic/SenseVoiceSmall", device="mps")
     await engine.initialize()
 
-    # 2. Build post-processing pipeline
     pipeline = ProcessorPipeline()
     pipeline.add(FillerFilterProcessor())
     pipeline.add(DictionaryReplaceProcessor(
         replacements={"欧克二": "OKR", "皮皮迪": "PPT"}
     ))
 
-    # 3. Recognize from file
     with open("recording.wav", "rb") as f:
-        audio_data = f.read()
-    result = await engine.recognize(audio_data)
+        result = await engine.recognize(f.read())
 
-    # 4. Post-process
     processed = await pipeline.run(result.text)
     print(processed.text)
 
@@ -309,74 +264,53 @@ asyncio.run(main())
 
 ## 🆚 Comparison
 
-| | **mutimodel-voice-plugin** | Wispr Flow | 蛐蛐 QuQu | 闪电说 |
+| | **This Project** | Wispr Flow | QuQu | 闪电说 |
 |---|---|---|---|---|
-| **Price** | ✅ Free & open source | $12/month | Free | Paid |
-| **Privacy** | ✅ 100% local | Cloud | Local | Cloud |
-| **Core Model** | SenseVoice-Small | Whisper | Paraformer-Large | Doubao |
-| **Engine Swap** | ✅ Config one-liner | ❌ | ❌ | ❌ |
-| **Interface** | CLI + Python lib | GUI | GUI (Electron) | GUI |
-| **Target User** | Developers | General | General | General |
-| **Custom Dictionary** | ✅ YAML hot-reload | ❌ | ❌ | ✅ Built-in |
-| **LLM Post-process** | ✅ Any OpenAI API | ❌ | ✅ | Exploring |
-| **Code Size** | Pure Python, ~2K LOC | — | Electron+Python | Closed |
+| **Price** | ✅ Free | $12/mo | Free | Paid |
+| **Privacy** | ✅ Local | Cloud | Local | Cloud |
+| **Model** | SenseVoice-Small | Whisper | Paraformer | Doubao |
+| **Engine Swap** | ✅ One-liner | ❌ | ❌ | ❌ |
+| **Interface** | CLI + Lib | GUI | GUI | GUI |
+| **Dictionary** | ✅ Hot-reload | ❌ | ❌ | ✅ |
+| **LLM Polish** | ✅ Any API | ❌ | ✅ | Exploring |
 
 ---
 
 ## 🗺️ Roadmap
 
 - [x] Core pipeline: Audio → ASR → Post-process → Output
-- [x] SenseVoice-Small as default engine
-- [x] Pluggable engine architecture (SenseVoice / Doubao / Whisper)
-- [x] Filler word filter (Chinese + English)
-- [x] Custom dictionary with hot-reload
-- [x] LLM post-processing (OpenAI-compatible)
-- [x] Global hotkey (F2, Toggle / Push-to-Talk)
-- [x] CLI tool (`mvplugin`)
-- [ ] Clipboard paste / keyboard simulation (type into any app)
+- [x] SenseVoice-Small / Doubao / Whisper engines
+- [x] Filler filter + dictionary + LLM polish
+- [x] Global hotkey + CLI tool
+- [ ] Clipboard paste / keyboard simulation
 - [ ] System tray with status indicator
-- [ ] Real-time partial results display
-- [ ] Audio file batch processing mode
-- [ ] WebSocket API for third-party integration
-- [ ] Electron/Tauri GUI wrapper
-- [ ] PyPI package release
+- [ ] WebSocket API for integration
+- [ ] GUI wrapper (Electron/Tauri)
+- [ ] PyPI release
 
 ---
 
 ## 🙏 Acknowledgements
 
-This project builds on top of amazing open-source work:
-
-- **[FunAudioLLM/SenseVoice](https://github.com/FunAudioLLM/SenseVoice)** — The core ASR model. Multilingual voice understanding from Alibaba.
-- **[FunASR](https://github.com/modelscope/FunASR)** — Industrial-grade speech recognition toolkit.
-- **[蛐蛐 QuQu](https://github.com/yan5xu/ququ)** — Inspiration for the desktop voice input workflow.
-- **[Wispr Flow](https://wispr.com)** — Inspiration for the "speak and it types" experience.
+- **[FunAudioLLM/SenseVoice](https://github.com/FunAudioLLM/SenseVoice)** — Core ASR model
+- **[FunASR](https://github.com/modelscope/FunASR)** — Speech recognition toolkit
+- **[QuQu](https://github.com/yan5xu/ququ)** — Desktop voice workflow inspiration
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-```bash
-# Development setup
-git clone https://github.com/Alexin09/mutimodel-voice-plugin.git
-cd mutimodel-voice-plugin
-pip install -e ".[dev,all]"
-pytest
-```
-
----
+See [CONTRIBUTING.md](CONTRIBUTING.md). PRs welcome!
 
 ## 📄 License
 
-[Apache License 2.0](LICENSE) — use it however you want.
+[Apache License 2.0](LICENSE)
 
 ---
 
 <div align="center">
 
-**If this project helps you, give it a ⭐**
+**If this helps you, give it a ⭐**
 
 Built with 🎙️ by [Jon](https://github.com/Alexin09)
 

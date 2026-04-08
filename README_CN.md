@@ -9,7 +9,7 @@
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](#-快速开始)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-[English](README.md) · **中文**
+**[English](README.md)**
 
 </div>
 
@@ -17,7 +17,7 @@
 
 ## 💡 一句话说明
 
-你对着麦克风说话，出来的文字**干净、准确、可以直接用**。
+你对着麦克风说话，出来的文字**干净、准确、直接能用**。
 
 ```
 你说：  "呃那个就是说我们下周三讨论一下欧克二的皮皮迪"
@@ -30,18 +30,18 @@
 
 | 现有方案 | 问题 |
 |---------|------|
-| **闪电说** | 闭源付费，被锁定在一个供应商 |
-| **蛐蛐 QuQu** | Electron 太重，默认用 Paraformer 需要三个模型配合 |
-| **Wispr Flow** | $12/月订阅，数据上传云端，中文支持一般 |
+| **闪电说** | 闭源付费，被供应商锁定 |
+| **蛐蛐 QuQu** | Electron 太重，Paraformer 需要三个模型配合 |
+| **Wispr Flow** | $12/月订阅，数据上云，中文一般 |
 | **系统自带语音输入** | 精度差，没有后处理，专业术语全错 |
 
-**mutimodel-voice-plugin** 的解法：
+**本项目的解法：**
 
-- ✅ **纯 Python**，轻量可嵌入，开发者友好
-- ✅ **SenseVoice-Small** 单模型搞定一切（ASR + VAD + 标点），~450MB
-- ✅ **引擎可插拔**，config 改一行就能换（SenseVoice → 豆包 → Whisper）
-- ✅ **智能后处理**：口语过滤 → 你自己的词典 → LLM 润色
-- ✅ **100% 本地**，语音数据不出你的电脑
+- ✅ 纯 Python，轻量可嵌入
+- ✅ SenseVoice-Small 单模型搞定一切（ASR + VAD + 标点），~450MB
+- ✅ 引擎可插拔，config 改一行就能换
+- ✅ 智能后处理：口语过滤 → 自定义词典 → LLM 润色
+- ✅ 100% 本地运行，语音数据不出你的电脑
 
 ---
 
@@ -82,7 +82,7 @@ cd mutimodel-voice-plugin
 # 核心 + SenseVoice + 快捷键
 pip install -e ".[sensevoice,hotkey]"
 
-# （可选）加上 LLM 润色功能
+# （可选）全部功能
 pip install -e ".[all]"
 ```
 
@@ -92,13 +92,31 @@ pip install -e ".[all]"
 mvplugin download-model
 ```
 
-> 模型来源：[ModelScope](https://modelscope.cn/models/iic/SenseVoiceSmall) · [HuggingFace](https://huggingface.co/FunAudioLLM/SenseVoiceSmall)
+> 📦 来源：[ModelScope](https://modelscope.cn/models/iic/SenseVoiceSmall)（国内快）· [HuggingFace](https://huggingface.co/FunAudioLLM/SenseVoiceSmall)
 
 ### 3. 开始使用
 
 ```bash
 mvplugin run          # 按 F2 开始/停止录音
 mvplugin devices      # 查看麦克风列表
+```
+
+插上麦克风，按 F2，开口说话就行了。
+
+---
+
+## 📋 命令行
+
+```bash
+mvplugin run                          # 启动语音识别
+mvplugin run --engine whisper         # 换用 Whisper
+mvplugin devices                      # 列出音频设备
+mvplugin download-model               # 下载模型
+
+mvplugin dict list                    # 查看词典
+mvplugin dict add "欧克二" "OKR"       # 添加替换规则
+
+mvplugin test recording.wav           # 用文件测试
 ```
 
 ---
@@ -118,10 +136,9 @@ processors:
     - dictionary_replace      # 自定义术语替换
     - llm_polish              # LLM 润色（可选）
 
-  # LLM 配置（支持任何兼容 OpenAI 的 API）
   llm_enabled: false
   llm_api_key: ""
-  llm_base_url: "https://api.openai.com/v1"    # 或通义/Kimi/豆包
+  llm_base_url: "https://api.openai.com/v1"
   llm_model: "gpt-4o-mini"
 
 hotkey:
@@ -139,6 +156,14 @@ llm_model: "qwen-turbo"
 # Kimi
 llm_base_url: "https://api.moonshot.cn/v1"
 llm_model: "moonshot-v1-8k"
+```
+
+### 环境变量
+
+```bash
+export MVPLUGIN_ASR_ENGINE=whisper
+export MVPLUGIN_ASR_DEVICE=mps
+export MVPLUGIN_LLM_API_KEY=sk-xxx
 ```
 
 ---
@@ -161,27 +186,36 @@ replacements:
 
 ## 🔌 引擎对比
 
-| 引擎 | 本地 | 流式 | 速度 | 中文 | 多语言 | 模型大小 |
-|------|------|------|------|------|--------|---------|
+| 引擎 | 本地 | 流式 | 速度 | 中文 | 多语言 | 大小 |
+|------|------|------|------|------|--------|------|
 | **SenseVoice-Small** ⭐ | ✅ | 分段 | ⚡⚡⚡ | ⭐⭐⭐⭐ | 50+ | ~450MB |
 | **豆包 2.0** | ❌ 云端 | ✅ 真流式 | ⚡⚡⚡ | ⭐⭐⭐⭐⭐ | 中英 | — |
 | **Whisper** | ✅ | 分段 | ⚡ | ⭐⭐⭐ | 99 | 75MB–3GB |
 
 ---
 
+## 🆚 对比
+
+| | **本项目** | Wispr Flow | 蛐蛐 QuQu | 闪电说 |
+|---|---|---|---|---|
+| **价格** | ✅ 免费开源 | $12/月 | 免费 | 付费 |
+| **隐私** | ✅ 本地 | 云端 | 本地 | 云端 |
+| **模型** | SenseVoice-Small | Whisper | Paraformer | 豆包 |
+| **换引擎** | ✅ 改一行 | ❌ | ❌ | ❌ |
+| **界面** | CLI + Python库 | GUI | GUI | GUI |
+| **词典** | ✅ 热加载 | ❌ | ❌ | ✅ |
+| **LLM 润色** | ✅ 任意API | ❌ | ✅ | 探索中 |
+
+---
+
 ## 🗺️ 路线图
 
 - [x] 核心 Pipeline：音频 → ASR → 后处理 → 输出
-- [x] SenseVoice-Small 默认引擎
-- [x] 可插拔引擎架构
-- [x] 口语填充词过滤（中英文）
-- [x] 自定义词典热加载
-- [x] LLM 后处理（兼容 OpenAI API）
-- [x] 全局快捷键（F2）
-- [x] CLI 工具
+- [x] SenseVoice-Small / 豆包 / Whisper 引擎
+- [x] 口语过滤 + 词典替换 + LLM 润色
+- [x] 全局快捷键 + CLI 工具
 - [ ] 剪贴板粘贴 / 模拟键盘输入
 - [ ] 系统托盘状态指示
-- [ ] 音频文件批量处理
 - [ ] WebSocket API
 - [ ] GUI 界面
 - [ ] PyPI 发包
@@ -192,9 +226,13 @@ replacements:
 
 - **[FunAudioLLM/SenseVoice](https://github.com/FunAudioLLM/SenseVoice)** — 核心 ASR 模型
 - **[FunASR](https://github.com/modelscope/FunASR)** — 阿里开源语音识别工具包
-- **[蛐蛐 QuQu](https://github.com/yan5xu/ququ)** — 桌面语音输入工作流的灵感来源
+- **[蛐蛐 QuQu](https://github.com/yan5xu/ququ)** — 桌面语音工作流灵感来源
 
 ---
+
+## 🤝 参与贡献
+
+详见 [CONTRIBUTING.md](CONTRIBUTING.md)，欢迎 PR！
 
 ## 📄 许可证
 
