@@ -20,10 +20,12 @@
 You talk into a mic. The text that comes out the other side is **clean, accurate, and ready to use**.
 
 ```
-You say:    "呃那个就是说我们下周三讨论一下欧克二的皮皮迪"
+You say:    "So um basically like we need to uh discuss the OKR in next Wednesday's PPT"
 
-You get:    "我们下周三讨论一下 OKR 的 PPT。"
+You get:    "We need to discuss the OKR in next Wednesday's PPT."
 ```
+
+> 🇨🇳 Works great for Chinese too — see [中文文档](README_CN.md) for Chinese examples.
 
 **mutimodel-voice-plugin** is a pure-Python voice recognition pipeline that chains together:
 
