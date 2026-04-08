@@ -9,7 +9,7 @@
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](#-quick-start)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-**[中文文档](README_CN.md)**
+<a href="README.md">🌐 English</a> &nbsp;|&nbsp; <a href="README_CN.md">🇨🇳 简体中文</a>
 
 </div>
 
@@ -24,8 +24,6 @@ You say:    "So um basically like we need to uh discuss the OKR in next Wednesda
 
 You get:    "We need to discuss the OKR in next Wednesday's PPT."
 ```
-
-> 🇨🇳 Works great for Chinese too — see [中文文档](README_CN.md) for Chinese examples.
 
 **mutimodel-voice-plugin** is a pure-Python voice recognition pipeline that chains together:
 
@@ -62,7 +60,7 @@ Add your own engine in ~50 lines of code.
 <td>
 
 ### 🧹 Smart Post-Processing
-Removes "um", "uh", "那个", "就是说".
+Removes filler words like "um", "uh", "basically", "you know".
 Custom dictionary for your jargon.
 Optional LLM polish (any OpenAI-compatible API).
 
@@ -131,7 +129,7 @@ cd mutimodel-voice-plugin
 # Core + SenseVoice engine + hotkey
 pip install -e ".[sensevoice,hotkey]"
 
-# (Optional) Add LLM post-processing
+# (Optional) All features including LLM post-processing
 pip install -e ".[all]"
 ```
 
@@ -164,7 +162,7 @@ mvplugin devices                      # List audio input devices
 mvplugin download-model               # Download SenseVoice-Small
 
 mvplugin dict list                    # List all dictionaries
-mvplugin dict add "欧克二" "OKR"       # Add replacement rule
+mvplugin dict add "misheard" "correct"  # Add replacement rule
 
 mvplugin test recording.wav           # Test recognition on a file
 ```
@@ -183,7 +181,7 @@ asr:
 
 processors:
   pipeline:
-    - filler_filter           # Remove "um", "那个", etc.
+    - filler_filter           # Remove "um", "uh", "basically", etc.
     - dictionary_replace      # Custom term replacement
     - llm_polish              # LLM refinement (optional)
 
@@ -214,12 +212,18 @@ Edit `dictionaries/default.yaml` — changes apply immediately (hot-reload):
 
 ```yaml
 replacements:
-  - from: "欧克二"
-    to: "OKR"
-  - from: ["赛恩斯沃伊斯", "森斯沃伊斯"]    # Multiple variants
+  - from: "gonna"
+    to: "going to"
+  - from: ["sensevoyce", "sense voice"]       # Multiple variants
     to: "SenseVoice"
-  - from: "re:皮{1,2}迪"                    # Regex support
-    to: "PPT"
+  - from: "re:w{1,2}isper"                    # Regex support
+    to: "Whisper"
+```
+
+Or via CLI:
+
+```bash
+mvplugin dict add "misheard-word" "correct-word"
 ```
 
 ---
@@ -250,7 +254,7 @@ async def main():
     pipeline = ProcessorPipeline()
     pipeline.add(FillerFilterProcessor())
     pipeline.add(DictionaryReplaceProcessor(
-        replacements={"欧克二": "OKR", "皮皮迪": "PPT"}
+        replacements={"gonna": "going to", "wanna": "want to"}
     ))
 
     with open("recording.wav", "rb") as f:
@@ -266,7 +270,7 @@ asyncio.run(main())
 
 ## 🆚 Comparison
 
-| | **This Project** | Wispr Flow | QuQu | 闪电说 |
+| | **This Project** | Wispr Flow | QuQu | Shandian Shuo |
 |---|---|---|---|---|
 | **Price** | ✅ Free | $12/mo | Free | Paid |
 | **Privacy** | ✅ Local | Cloud | Local | Cloud |

@@ -9,7 +9,7 @@
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](#-快速开始)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-**[English](README.md)**
+<a href="README.md">🌐 English</a> &nbsp;|&nbsp; <a href="README_CN.md">🇨🇳 简体中文</a>
 
 </div>
 
